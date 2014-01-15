@@ -1,14 +1,26 @@
 package game_jh365;
 import java.awt.Color;
+import java.util.ArrayList;
 
 import jgame.*;
 import jgame.platform.*;
 /** TODO
+ * Battle Screen
+ * Enemies
+ * 
  */
 public class BlackSheepEngine extends JGEngine{
-	public Integer[][] grid;
+	BSUnit[][] grid;
 	BSPlayer player;
 	BSPlayerObject playerObject;
+	ArrayList<BSUnit> npcUnits;
+	ArrayList<BSUnitObject> npcUnitObjects;
+	BSBattleUnit battlePlayer;
+	BSBattleUnit battleEnemy;
+	
+	final int MAX_NPC_UNITS = 100;
+	final double MAX_NPC_GENERATION_PROBABILITY = 0.2;
+	
 	public BlackSheepEngine(JGPoint size){
 		initEngine(size.x, size.y);
 	}
@@ -26,15 +38,26 @@ public class BlackSheepEngine extends JGEngine{
 	@Override
 	public void initGame() {
 		setFrameRate(35, 2);
-		grid = new Integer[BlackSheepGame.WINDOW_TILE_LENGTH][BlackSheepGame.WINDOW_TILE_WIDTH];
+		grid = new BSUnit[BlackSheepGame.WINDOW_TILE_LENGTH][BlackSheepGame.WINDOW_TILE_WIDTH];
 		setGameState("InGame");
 	}
+	
 	public void startInGame(){
+		removeObjects(null, 0);
+		if(npcUnits == null)
+			npcUnits = new ArrayList<BSUnit>();
+		npcUnitObjects = new ArrayList<BSUnitObject>();
+		for(BSUnit i : npcUnits){
+			BSUnitObject tempObject = new BSUnitObject(this);
+			tempObject.loadUnit(i);
+			npcUnitObjects.add(tempObject);
+		}
 		if(player == null)
 			player = new BSPlayer();
-		playerObject = new BSPlayerObject();
-		playerObject.loadPlayer(player);
+		playerObject = new BSPlayerObject(this);
+		playerObject.loadUnit(player);
 	}
+	
 	/** A simple timer. */
 	int gametimer=0;
 	/** Mouse position of previous frame. */
@@ -42,53 +65,102 @@ public class BlackSheepEngine extends JGEngine{
 	public void doFrameInGame(){
 		moveObjects(null, 0);
 		gametimer++;
+		boolean moving = true;
 		//processKeys();
 		if(getKey(KeyLeft)){
 			clearKey(KeyLeft);
-			player.position_x -= 1;
+			if(player.position_x > 0) player.position_x -= 1;
 		}else if(getKey(KeyRight)){
 			clearKey(KeyRight);
-			player.position_x += 1;
+			if(player.position_x < 19) player.position_x += 1;
 		}else if(getKey(KeyUp)){
 			clearKey(KeyUp);
-			player.position_y -= 1;
+			if(player.position_y > 0) player.position_y -= 1;
 		}else if(getKey(KeyDown)){
 			clearKey(KeyDown);
-			player.position_y += 1;
+			if(player.position_y < 19) player.position_y += 1;
+		}else{
+			moving = false;
 		}
+
 		if(getKey('R')){
 			clearKey('R');
-			player.increaseRage(5);
+			player.increaseRed(5);
 		}else if(getKey('G')){
 			clearKey('G');
-			player.increaseGrit(5);
+			player.increaseGreen(5);
 		}else if(getKey('B')){
 			clearKey('B');
-			player.increaseBrawn(5);
+			player.increaseBlue(5);
 		}
-		System.out.println(player.getRage());
-		this.setBGColor(new JGColor(255 - player.getRage(), 255 - player.getGrit(), 255 - player.getBrawn()));
 		
 		if(getKey(KeyEsc)){
 			clearKey(KeyEsc);
 			setGameState("PlayerStats");
+		}
+		if(grid[player.position_x][player.position_y] != null){
+			BSUnit tempUnit = grid[player.position_x][player.position_y];
+			//player.increaseRed(tempUnit.getRed()/5 - 1);
+			//player.increaseBlue(tempUnit.getBlue()/5 - 1);
+			//player.increaseGreen(tempUnit.getGreen()/5 - 1);
+			grid[player.position_x][player.position_y].setPosition(20, 20);
+			setGameState("Battle");
+		}
+		
+		if(moving){// && (int) random(0, MAX_NPC_UNITS / MAX_NPC_GENERATION_PROBABILITY, 1) < MAX_NPC_UNITS - npcUnits.size()){
+			generateNPC();
+		}
+		//random(-2, 2, 1);
+	}
+	public void generateNPC(){
+		
+		int x = random(0, BlackSheepGame.WINDOW_TILE_LENGTH - 1, 1);
+		int y = random(0, BlackSheepGame.WINDOW_TILE_WIDTH - 1, 1);
+		System.out.println(x + " " + y);
+		if(player.position_x == x && player.position_y == y) return;
+		for(BSUnit i : npcUnits){
+			if(i.position_x == x && i.position_y == y){
+				return;
+			}
+		}
+		BSUnit newUnit = new BSUnit();
+		newUnit.setPosition(x, y);
+		grid[x][y] = newUnit; 
+		BSUnitObject newUnitObject = new BSUnitObject(this);
+		npcUnits.add(newUnit);
+		newUnitObject.loadUnit(newUnit);
+		npcUnitObjects.add(newUnitObject);
+		
+		int color = random(0, 2, 1);
+		System.out.println("Color: " + color);
+		if(color==0){
+			newUnit.increaseRed(250);
+			newUnit.name="red";
+		}
+		else if(color==1){
+			newUnit.increaseGreen(250);
+			newUnit.name="green";
+		}
+		else if(color==2){
+			newUnit.increaseBlue(250);
+			newUnit.name="blue";
 		}
 	}
 	public void startPlayerStats(){
 		removeObjects(null, 0);
 	}
 	public void paintFramePlayerStats(){
-		drawString("Player Stats", pfWidth()/2, 40, 0, new JGFont("Arial", 0, 30), new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-		drawString("RAGE", 80, 110, 1, new JGFont("Arial", 0, 18), new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-		drawString("GRIT", 80, 160, 1, new JGFont("Arial", 0, 18), new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-		drawString("BRAWN", 80, 210, 1, new JGFont("Arial", 0, 18), new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-		drawRect(100, 108, player.getRage() / 2, 18, true, false, 1, JGColor.red);
-		drawRect(100, 158, player.getGrit() / 2, 18, true, false, 1, JGColor.green);
-		drawRect(100, 208, player.getBrawn() / 2, 18, true, false, 1, JGColor.blue);
-		drawString(player.getRage() + "", 240, 110, -1, new JGFont("Arial", 0, 18), new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-		drawString(player.getGrit() + "", 240, 160, -1, new JGFont("Arial", 0, 18), new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-		drawString(player.getBrawn() + "", 240, 210, -1, new JGFont("Arial", 0, 18), new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-		//drawRect(100, 5, player.getRage(), 18, true, false);
+		drawString("Player Stats", pfWidth()/2, 40, 0, new JGFont("Arial", 0, 30), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		drawString("Red", 80, 110, 1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		drawString("Green", 80, 160, 1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		drawString("Blue", 80, 210, 1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		drawRect(100, 108, player.getRed() / 2, 18, true, false, 1, JGColor.red);
+		drawRect(100, 158, player.getGreen() / 2, 18, true, false, 1, JGColor.green);
+		drawRect(100, 208, player.getBlue() / 2, 18, true, false, 1, JGColor.blue);
+		drawString(player.getRed() + "", 240, 110, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		drawString(player.getGreen() + "", 240, 160, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		drawString(player.getBlue() + "", 240, 210, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		//drawRect(100, 5, player.getRed(), 18, true, false);
 	}
 	public void doFramePlayerStats(){
 		if(getKey(KeyEsc)){
@@ -96,71 +168,53 @@ public class BlackSheepEngine extends JGEngine{
 			setGameState("InGame");
 		}
 	}
-	class BSPlayer{
-		int position_x;
-		int position_y;
+	public void startBattle(){
+		removeObjects(null, 0);
 		
-		int statRage;
-		int statGrit;
-		int statBrawn;
-		BSPlayer(){
-			position_x = 8;
-			position_y = 1;
-			
-			statRage = 5;
-			statGrit = 5;
-			statBrawn = 5;
-		}
-		public void increaseRage(int increaseAmt){
-			statRage += increaseAmt;
-		}
-		public void increaseGrit(int increaseAmt){
-			statGrit += increaseAmt;
-		}
-		public void increaseBrawn(int increaseAmt){
-			statBrawn += increaseAmt;
-		}
-		public int getRage(){
-			return statRage;
-		}
-		public int getGrit(){
-			return statGrit;
-		}
-		public int getBrawn(){
-			return statBrawn;
-		}
-		public int getPositionX(){
-			return position_x;
-		}
-		public int getPositionY(){
-			return position_y;
+		battlePlayer = new BSBattleUnit(player.getRed(), player, true, this);
+		battleEnemy = new BSBattleUnit(npcUnits.size() * (npcUnits.size() + 1) / 4 + 1, grid[player.position_x][player.position_y], false, this);
+	}
+	public void paintFrameBattle(){
+		//drawString("Player Stats", pfWidth()/2, 40, 0, new JGFont("Arial", 0, 30), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		//drawString("Red", 80, 110, 1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		//drawString("Green", 80, 160, 1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		
+		//JGColor color = grid[player.position_x][player.position_y].getColor();
+		//drawRect(0, 0, 320, 320, true, false, 1, new JGColor(111, 111, 111));  // background
+		
+		/*
+		drawOval(100, 220, 150, 150, true, true, 1, player.getColor()); // player
+		drawOval(100, 220, 150, 150, false, true, 10, JGColor.white);  // player
+		
+		drawRect(10, 40, 120, 30, true, false, 1, JGColor.white);  //enemy HP block
+		drawRect(50, 40, 70, 26, true, false, 1, new JGColor(111, 111, 111));  //enemy HP block
+		drawRect(50, 46, 70, 14, true, false, 1, color);  //enemy HP block
+		drawString("HP:", 15, 49, -1, new JGFont("Arial", 1, 18), JGColor.black);
+		drawString("120 / 212", 85, 35, 0, new JGFont("Arial", 1, 12), JGColor.white);
+		
+		drawRect(190, 200, 120, 30, true, false, 1, JGColor.white);  //player HP block
+		drawRect(230, 200, 70, 26, true, false, 1, new JGColor(111, 111, 111));  //player HP block
+		drawRect(230, 206, 70, 14, true, false, 1, color);  //player HP block
+		drawString("HP:", 195, 209, -1, new JGFont("Arial", 1, 18), JGColor.black);
+		drawString("120 / 212", 265, 195, 0, new JGFont("Arial", 1, 12), JGColor.white);
+		
+		drawRect(220, 20, 150, 150, true, true, 1, color);  //enemy
+		drawRect(220, 20, 150, 150, false, true, 10, JGColor.white);  //enemy
+		*/
+		drawRect(0, 240, 320, 80, true, false, 1, JGColor.white);
+		drawRect(7, 247, 306, 66, true, false, 1, JGColor.black);
+		
+		//drawString(player.getRed() + "", 240, 110, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		//drawString(player.getGreen() + "", 240, 160, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		//drawString(player.getBlue() + "", 240, 210, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
+		//drawRect(100, 5, player.getRed(), 18, true, false);
+	}
+	public void doFrameBattle(){
+		if(getKey(KeyEsc)){
+			clearKey(KeyEsc);
+			grid[player.position_x][player.position_y] = null;
+			setGameState("InGame");
 		}
 	}
-	class BSPlayerObject extends JGObject{
-		BSPlayer player;
-		BSPlayerObject(){
-			super(
-				"Player",// name by which the object is known
-				true,
-				0,  // X position
-				0, // Y position
-				1, // the object's collision ID (used to determine which classes
-				   // of objects should collide with each other)
-				null // name of sprite or animation to use (null is none)
-			);
-			xspeed = 0;
-			yspeed = 0;
-		}
-		public void loadPlayer(BSPlayer loadedPlayer){
-			player = loadedPlayer;
-		}
-		public void move(){
-			x = player.position_x * BlackSheepGame.TILE_LENGTH;
-			y = player.position_y * BlackSheepGame.TILE_WIDTH;
-		}
-		public void paint(){
-			setColor(new JGColor(player.getRage(), player.getGrit(), player.getBrawn()));
-			drawOval(x,y,16,16,true,false);
-		}
-	}
+	
 }
