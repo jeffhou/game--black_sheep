@@ -18,7 +18,6 @@ public class BlackSheepEngine extends JGEngine{
 	BSBattleController battleController;
 	
 	final int MAX_NPC_UNITS = 100;
-	final double MAX_NPC_GENERATION_PROBABILITY = 0.2;
 	
 	public BlackSheepEngine(JGPoint size){
 		initEngine(size.x, size.y);
@@ -89,8 +88,6 @@ public class BlackSheepEngine extends JGEngine{
 	
 	/** A simple timer. */
 	int gametimer=0;
-	/** Mouse position of previous frame. */
-	//int prevmousex=0,prevmousey=0;
 	public void doFrameInGame(){
 		moveObjects(null, 0);
 		gametimer++;
@@ -128,7 +125,6 @@ public class BlackSheepEngine extends JGEngine{
 			setGameState("PlayerStats");
 		}
 		if(grid[player.position_x][player.position_y] != null){
-			BSUnit tempUnit = grid[player.position_x][player.position_y];
 			//player.increaseRed(tempUnit.getRed()/5 - 1);
 			//player.increaseBlue(tempUnit.getBlue()/5 - 1);
 			//player.increaseGreen(tempUnit.getGreen()/5 - 1);
@@ -207,39 +203,6 @@ public class BlackSheepEngine extends JGEngine{
 		
 	}
 	public void paintFrameBattle(){
-		//drawString("Player Stats", pfWidth()/2, 40, 0, new JGFont("Arial", 0, 30), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
-		//drawString("Red", 80, 110, 1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
-		//drawString("Green", 80, 160, 1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
-		
-		//JGColor color = grid[player.position_x][player.position_y].getColor();
-		//drawRect(0, 0, 320, 320, true, false, 1, new JGColor(111, 111, 111));  // background
-		
-		/*
-		drawOval(100, 220, 150, 150, true, true, 1, player.getColor()); // player
-		drawOval(100, 220, 150, 150, false, true, 10, JGColor.white);  // player
-		
-		drawRect(10, 40, 120, 30, true, false, 1, JGColor.white);  //enemy HP block
-		drawRect(50, 40, 70, 26, true, false, 1, new JGColor(111, 111, 111));  //enemy HP block
-		drawRect(50, 46, 70, 14, true, false, 1, color);  //enemy HP block
-		drawString("HP:", 15, 49, -1, new JGFont("Arial", 1, 18), JGColor.black);
-		drawString("120 / 212", 85, 35, 0, new JGFont("Arial", 1, 12), JGColor.white);
-		
-		drawRect(190, 200, 120, 30, true, false, 1, JGColor.white);  //player HP block
-		drawRect(230, 200, 70, 26, true, false, 1, new JGColor(111, 111, 111));  //player HP block
-		drawRect(230, 206, 70, 14, true, false, 1, color);  //player HP block
-		drawString("HP:", 195, 209, -1, new JGFont("Arial", 1, 18), JGColor.black);
-		drawString("120 / 212", 265, 195, 0, new JGFont("Arial", 1, 12), JGColor.white);
-		
-		drawRect(220, 20, 150, 150, true, true, 1, color);  //enemy
-		drawRect(220, 20, 150, 150, false, true, 10, JGColor.white);  //enemy
-		
-		drawRect(0, 240, 320, 80, true, false, 1, JGColor.white);
-		drawRect(7, 247, 306, 66, true, false, 1, JGColor.black);
-		*/
-		//drawString(player.getRed() + "", 240, 110, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
-		//drawString(player.getGreen() + "", 240, 160, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
-		//drawString(player.getBlue() + "", 240, 210, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
-		//drawRect(100, 5, player.getRed(), 18, true, false);
 	}
 	public void doFrameBattle(){
 		if(player.getRed() == 255 && player.getBlue() == 255 && player.getGreen() == 255) setGameState("Win");
