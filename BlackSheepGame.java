@@ -1,6 +1,6 @@
 package game_jh365;
 import jgame.*;
-import jgame.platform.*;
+
 
 public class BlackSheepGame{
 	public static final int TILE_LENGTH = 16;

@@ -17,6 +17,7 @@ public class BlackSheepEngine extends JGEngine{
 	ArrayList<BSUnitObject> npcUnitObjects;
 	BSBattleUnit battlePlayer;
 	BSBattleUnit battleEnemy;
+	BSBattleController battleController;
 	
 	final int MAX_NPC_UNITS = 100;
 	final double MAX_NPC_GENERATION_PROBABILITY = 0.2;
@@ -41,7 +42,18 @@ public class BlackSheepEngine extends JGEngine{
 		grid = new BSUnit[BlackSheepGame.WINDOW_TILE_LENGTH][BlackSheepGame.WINDOW_TILE_WIDTH];
 		setGameState("InGame");
 	}
-	
+	public void startWin(){
+		removeObjects(null, 0);
+	}
+	public void paintFrameWin(){
+		drawString("You win!", pfWidth()/2, pfHeight()/2 - 50, 0, new JGFont("Arial", 0, 40), JGColor.white);
+	}
+	public void startLose(){
+		removeObjects(null, 0);
+	}
+	public void paintFrameLose(){
+		drawString("You lose!", pfWidth()/2, pfHeight()/2 - 20, 0, new JGFont("Arial", 0, 40), JGColor.white);
+	}
 	public void startInGame(){
 		removeObjects(null, 0);
 		if(npcUnits == null)
@@ -107,7 +119,7 @@ public class BlackSheepEngine extends JGEngine{
 			setGameState("Battle");
 		}
 		
-		if(moving){// && (int) random(0, MAX_NPC_UNITS / MAX_NPC_GENERATION_PROBABILITY, 1) < MAX_NPC_UNITS - npcUnits.size()){
+		if(npcUnits.size() == 0 || moving && (int) random(0, 6, 1) == 1){
 			generateNPC();
 		}
 		//random(-2, 2, 1);
@@ -167,12 +179,15 @@ public class BlackSheepEngine extends JGEngine{
 			clearKey(KeyEsc);
 			setGameState("InGame");
 		}
+		System.out.println(npcUnits.size());
 	}
 	public void startBattle(){
 		removeObjects(null, 0);
 		
 		battlePlayer = new BSBattleUnit(player.getRed(), player, true, this);
 		battleEnemy = new BSBattleUnit(npcUnits.size() * (npcUnits.size() + 1) / 4 + 1, grid[player.position_x][player.position_y], false, this);
+		battleController = new BSBattleController(player, grid[player.position_x][player.position_y], this);
+		
 	}
 	public void paintFrameBattle(){
 		//drawString("Player Stats", pfWidth()/2, 40, 0, new JGFont("Arial", 0, 30), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
@@ -200,21 +215,63 @@ public class BlackSheepEngine extends JGEngine{
 		
 		drawRect(220, 20, 150, 150, true, true, 1, color);  //enemy
 		drawRect(220, 20, 150, 150, false, true, 10, JGColor.white);  //enemy
-		*/
+		
 		drawRect(0, 240, 320, 80, true, false, 1, JGColor.white);
 		drawRect(7, 247, 306, 66, true, false, 1, JGColor.black);
-		
+		*/
 		//drawString(player.getRed() + "", 240, 110, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
 		//drawString(player.getGreen() + "", 240, 160, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
 		//drawString(player.getBlue() + "", 240, 210, -1, new JGFont("Arial", 0, 18), new JGColor(255 - player.getRed() / 2, 255 - player.getGreen() / 2, 255 - player.getBlue() / 2));
 		//drawRect(100, 5, player.getRed(), 18, true, false);
 	}
 	public void doFrameBattle(){
-		if(getKey(KeyEsc)){
-			clearKey(KeyEsc);
-			grid[player.position_x][player.position_y] = null;
-			setGameState("InGame");
+		if(player.getRed() == 255 && player.getBlue() == 255 && player.getGreen() == 255) setGameState("Win");
+		if(getKey(' ')){
+			clearKey(' ');
+			if(battlePlayer.hp == 0) setGameState("Lose");
+			if(battleController.phase == 3){
+				player.increaseExp(grid[player.position_x][player.position_y], battleController.relevant_stat);
+				npcUnits.remove(grid[player.position_x][player.position_y]);
+				grid[player.position_x][player.position_y] = null;
+				setGameState("InGame");
+			}
+			battleController.phase = (battleController.phase + 1) % 3;
+			battleController.postCalc = false;
+			
 		}
+		if(battleEnemy.hp <= 0 || battleController.phase == 1 && !battleController.postCalc){
+			battleEnemy.hp -= player.getStat(battleController.selector_x * 2 + battleController.selector_y) / 2 + 1;
+			if(battleEnemy.hp <= 0){
+				battleEnemy.hp = 0;
+				battleController.phase = 3;
+			}
+			battleController.postCalc = true;
+		}else if(battleController.phase == 2 && !battleController.postCalc){
+			battlePlayer.hp -= battleController.relevant_stat / 2 + 1;
+			if(battlePlayer.hp <= 0){
+				battlePlayer.hp = 0;
+			}
+			battleController.postCalc = true;
+		}
+		
+		if(getKey('K')){
+			clearKey('K');
+			battleEnemy.hp -= 1000000;
+			
+		}else if(getKey(KeyLeft)){
+			clearKey(KeyLeft);
+			battleController.moveLeft();
+		}else if(getKey(KeyRight)){
+			clearKey(KeyRight);
+			battleController.moveRight();
+		}else if(getKey(KeyUp)){
+			clearKey(KeyUp);
+			battleController.moveUp();
+		}else if(getKey(KeyDown)){
+			clearKey(KeyDown);
+			battleController.moveDown();
+		}
+		
 	}
 	
 }
