@@ -1,7 +1,5 @@
 package game_jh365;
-import java.awt.Color;
 import java.util.ArrayList;
-
 import jgame.*;
 import jgame.platform.*;
 /** TODO
@@ -40,7 +38,26 @@ public class BlackSheepEngine extends JGEngine{
 	public void initGame() {
 		setFrameRate(35, 2);
 		grid = new BSUnit[BlackSheepGame.WINDOW_TILE_LENGTH][BlackSheepGame.WINDOW_TILE_WIDTH];
-		setGameState("InGame");
+		setGameState("Instructions");
+	}
+	public void startInstructions(){
+		removeObjects(null, 0);
+	}
+	public void paintFrameInstructions(){
+		drawString("BLACK SHEEP", pfWidth()/2, 50, 0, new JGFont("Arial", 0, 30), JGColor.white);
+		drawString("To win, get 255 in every stat. You gain", pfWidth()/2, 100, 0, new JGFont("Arial", 0, 18), JGColor.white);
+		drawString("stats by winning fights. Your skills", pfWidth()/2, 120, 0, new JGFont("Arial", 0, 18), JGColor.white);
+		drawString("are based on your individual stats. Use", pfWidth()/2, 140, 0, new JGFont("Arial", 0, 18), JGColor.white);
+		drawString("arrow keys and space bar to navigate", pfWidth()/2, 160, 0, new JGFont("Arial", 0, 18), JGColor.white);
+		drawString("texts. Esc to reach stats page.", pfWidth()/2, 180, 0, new JGFont("Arial", 0, 18), JGColor.white);
+		
+		drawString("Press space to begin.", pfWidth()/2, 220, 0, new JGFont("Arial", 0, 18), JGColor.white);
+	}
+	public void doFrameInstructions(){
+		if(getKey(' ')){
+			clearKey(' ');
+			setGameState("InGame");
+		}
 	}
 	public void startWin(){
 		removeObjects(null, 0);
