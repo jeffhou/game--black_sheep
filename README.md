@@ -11,3 +11,9 @@ Defeat a variety of enemies while gaining experience. The protagonist doesn't ha
 In the adventure map, arrow keys move protagonist. Player should move in a defined direction and will encounter enemies. Upon encountering enemies, the battle screen will feature the protagonist fighting with the enemy through a list of commands. Upon winning, the protagonist gains experience. Upon getting to each experience threshold, the protagonist will heal to full health. Upon death, the player must restart from the beginning. 
 ###Modes
 The modes are simple: Adventure Map (tiled map) and Battle Screen (turned-based battle screen)
+
+###Cheat Keys
+To increase RED stat by 5 in adventure screen, press R.
+To increase GREEN stat by 5 in adventure screen, press G.
+To increase BLUE stat by 5 in adventure screen, press B.
+To auto-win in battle, press K.
