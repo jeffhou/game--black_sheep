@@ -1,12 +1,9 @@
 package game_jh365;
 import java.util.ArrayList;
+
+import jgame.platform.JGEngine;
 import jgame.*;
-import jgame.platform.*;
-/** TODO
- * Battle Screen
- * Enemies
- * 
- */
+
 public class BlackSheepEngine extends JGEngine{
 	BSUnit[][] grid;
 	BSPlayer player;

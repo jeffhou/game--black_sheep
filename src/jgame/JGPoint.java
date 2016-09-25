@@ -3,7 +3,7 @@ package jgame;
 /** Minimal replacement of java.awt.Point. */
 public class JGPoint {
 
-	public int x=0,y=0;
+	public int x = 0, y = 0;
 
 	public JGPoint () {}
 
@@ -13,10 +13,11 @@ public class JGPoint {
 	}
 
 	public JGPoint (int x,int y) {
-		this.x=x;
-		this.y=y;
+		this.x = x;
+		this.y = y;
 	}
+	
 	public String toString() {
-		return "JGPoint("+x+","+y+")";
+		return "JGPoint(" + x + "," + y + ")";
 	}
 }

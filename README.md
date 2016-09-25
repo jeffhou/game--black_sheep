@@ -1,6 +1,8 @@
 The Black Sheep
 ===============
 ---------------
+To play, run BlackSheepGame.
+ 
 ###Genre
 Role-Playing Game (RPG)
 ###Story
