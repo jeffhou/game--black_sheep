@@ -202,7 +202,7 @@ public class BlackSheepEngine extends JGEngine{
 	public void paintFrameBattle(){
 	}
 	public void doFrameBattle(){
-		if(player.getRed() == 255 && player.getBlue() == 255 && player.getGreen() == 255) setGameState("Win");
+		if(player.getRed() >= 255 && player.getBlue() >= 255 && player.getGreen() >= 255) setGameState("Win");
 		if(getKey(' ')){
 			clearKey(' ');
 			if(battlePlayer.hp == 0) setGameState("Lose");
